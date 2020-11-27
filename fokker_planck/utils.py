@@ -1,6 +1,7 @@
 import torch
+from torch.autograd import grad
 
-
+'''
 def net_deriviate(net, x, order=1):
     x_ = x.clone().detach().view(-1)
     param = list(net.parameters())
@@ -20,6 +21,23 @@ def net_deriviate(net, x, order=1):
 
 def batch_get_deriviate(net, batch_x, order=1):
     return torch.stack([net_deriviate(net, x, order) for x in batch_x])
+'''
+
+def grad_net(y, x, order=1):
+    weights = torch.ones_like(y)
+    if order == 1:
+        g = grad(outputs=y, inputs=x, grad_outputs=weights, create_graph=True)[0]
+        return g
+    elif order == 2:
+        g_1 = grad(outputs=y, inputs=x, grad_outputs=weights, create_graph=True)[0]
+        g_2 = grad(outputs=g_1, inputs=x, grad_outputs=weights, create_graph=True)[0]
+        return g_2
+    else:
+        raise NotImplementedError
+
+
+def batch_grad_net(batch_y, batch_x, order=1):
+    return torch.stack([grad_net(y, x, order) for y, x in zip(batch_y, batch_x)])
 
 
 def get_difference(x, dt, order=1):
@@ -35,5 +53,3 @@ def get_difference(x, dt, order=1):
 def batch_get_difference(batch_x, dt, order=1):
     r = batch_x.size()[0]
     return torch.stack([get_difference(batch_x[i], dt, order) for i in range(r)]).unsqueeze(2)
-
-

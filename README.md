@@ -6,12 +6,18 @@ It will be different from the original paper due some implement detail(I use two
 implement how to get deriviate of neural network).
 
 ## Run the code
-``python train.py --phase='difference'``
+`python train.py --phase='grad'`
 
-``python train.py --phase='deriviate'``
+Default phase is 'grad', where other phases like 'difference' can be chosen.
+
+use the following code:
+
+`python train.py --phase='difference'`
 
 ## Result
 
+After 30000 iterations training, loss will drop to about $10^{-7}$.
 
 
-![res](/home/caliber/Desktop/PDEs_by_DL/fokker_planck/pic_save/res.png)
+
+![res](fokker_planck/pic_save/res.png)

@@ -7,6 +7,8 @@ class NeuralNet(nn.Module):
         self.layer = nn.Sequential(
             nn.Linear(input_size, hidden_size),
             nn.Sigmoid(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.Sigmoid(),
             nn.Linear(hidden_size, output_size)
         )
 

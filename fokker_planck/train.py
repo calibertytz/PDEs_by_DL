@@ -2,7 +2,7 @@ import torch
 from model import NeuralNet
 from data_prepare import PdeDataset, gen_train_data
 from torch.utils.data import DataLoader
-from utils import batch_get_difference, batch_get_deriviate
+from utils import batch_get_difference, grad_net
 from tqdm import tqdm
 import argparse
 import os
@@ -14,15 +14,15 @@ else:
     pass
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--lr', type=float, default=0.003)
+parser.add_argument('--lr', type=float, default=3e-2)
 parser.add_argument('--batch_size', type=int, default=1)
-parser.add_argument('--num_epoch', type=int, default=2000)
+parser.add_argument('--num_epoch', type=int, default=10000)
 parser.add_argument('--hidden_size', type=int, default=20)
 parser.add_argument('--dt', type=float, default=0.01)
 parser.add_argument('--sigma', type=float, default=0.5)
 parser.add_argument('--a', type=float, default=0.3)
 parser.add_argument('--b', type=float, default=0.5)
-parser.add_argument('--phase', type=str, default='difference')
+parser.add_argument('--phase', type=str, default='grad')
 config = parser.parse_args()
 
 print(config)
@@ -46,20 +46,19 @@ optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 def train(config):
     for epoch in tqdm(range(config.num_epoch)):
         for x, y in zip(train_loader_1, train_loader_2):
-            x = x.cuda()
-            y = y.cuda()
-            out1 = model(x)
-            out2 = model(y)
+            var_x = x.cuda().requires_grad_()
+            var_y = y.cuda().requires_grad_()
+            out1 = model(var_x)
+            out2 = model(var_y)
+            f_value = f_func(var_x)
 
-            f_value = f_func(x)
-
-            if config.phase == 'deriviate':
-                f_deriviate_value = d_f_func(x)
-                e1 = ((-(f_value * batch_get_deriviate(model, x) + f_deriviate_value * out1) +
-                       ((config.sigma**2) / 2) * batch_get_deriviate(model, x, order=2))**2).mean()
-            elif config.phase == 'difference':
+            if config.phase == 'difference':
                 e1 = ((-batch_get_difference(f_value * out1, config.dt) +
-                      ((config.sigma **2)/2) * batch_get_difference(out1, config.dt, order=2))**2).mean()
+                      ((config.sigma ** 2)/2) * batch_get_difference(out1, config.dt, order=2))**2).mean()
+            elif config.phase == 'grad':
+                f_deriviate_value = d_f_func(var_x)
+                e1 = ((-(f_value * grad_net(out1, var_x) + f_deriviate_value * out1) +
+                      ((config.sigma**2) / 2) * grad_net(out1, var_x, order=2))**2).mean()
             else:
                 raise NotImplementedError
 
