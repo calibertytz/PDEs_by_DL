@@ -9,6 +9,8 @@ class NeuralNet(nn.Module):
             nn.Sigmoid(),
             nn.Linear(hidden_size, hidden_size),
             nn.Sigmoid(),
+            nn.Linear(hidden_size, hidden_size),
+            nn.Sigmoid(),
             nn.Linear(hidden_size, output_size)
         )
 

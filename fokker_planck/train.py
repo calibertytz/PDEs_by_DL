@@ -16,7 +16,7 @@ else:
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', type=float, default=3e-2)
 parser.add_argument('--batch_size', type=int, default=1)
-parser.add_argument('--num_epoch', type=int, default=10000)
+parser.add_argument('--num_epoch', type=int, default=30000)
 parser.add_argument('--hidden_size', type=int, default=20)
 parser.add_argument('--dt', type=float, default=0.01)
 parser.add_argument('--sigma', type=float, default=0.5)
